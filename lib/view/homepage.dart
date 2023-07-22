@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:math_expressions/math_expressions.dart';
+import '../constants.dart';
 import '../widgets/Mybuttons.dart';
 
 class Homepage extends StatefulWidget {
@@ -58,7 +59,8 @@ class _HomepageState extends State<Homepage> {
                       alignment: Alignment.centerRight,
                       child: Text(
                         answer,
-                        style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 40, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
@@ -88,21 +90,22 @@ class _HomepageState extends State<Homepage> {
                           });
                         },
                         buttonText: buttons[index],
-                        color: Colors.lightGreen,
-                        textColor: Colors.white,
+                        color: green,
+                        textColor: white,
                       );
                     } else if (index == 1) {
                       return MyButton(
                         onPressed: () {
                           setState(() {
                             if (userInput.isNotEmpty) {
-                              userInput = userInput.substring(0, userInput.length - 1);
+                              userInput =
+                                  userInput.substring(0, userInput.length - 1);
                             }
                           });
                         },
                         buttonText: buttons[index],
-                        color: Colors.redAccent,
-                        textColor: Colors.white,
+                        color: red,
+                        textColor: white,
                       );
                     } else if (index == buttons.length - 1) {
                       return MyButton(
@@ -112,8 +115,24 @@ class _HomepageState extends State<Homepage> {
                           });
                         },
                         buttonText: buttons[index],
+                        color: blueGrey,
+                        textColor: white,
+                      );
+                    } else if (index == 2) {
+                      return MyButton(
+                        onPressed: () {
+                          setState(() {
+                            if (userInput.isNotEmpty) {
+                              double percentage =
+                                  double.tryParse(userInput) ?? 0.0;
+                              percentage /= 100;
+                              userInput = percentage.toString();
+                            }
+                          });
+                        },
+                        buttonText: buttons[index],
                         color: Colors.blueGrey,
-                        textColor: Colors.white,
+                        textColor: white,
                       );
                     }
                     return MyButton(
@@ -124,19 +143,23 @@ class _HomepageState extends State<Homepage> {
                           } else if (buttons[index] == 'ANS') {
                             userInput += answer;
                           } else {
-                            // Check if the last character is an operator and remove it
                             if (userInput.isNotEmpty &&
                                 isOperator(userInput[userInput.length - 1]) &&
                                 isOperator(buttons[index])) {
-                              userInput = userInput.substring(0, userInput.length - 1);
+                              userInput =
+                                  userInput.substring(0, userInput.length - 1);
                             }
                             userInput += buttons[index];
                           }
                         });
                       },
                       buttonText: buttons[index],
-                      textColor: isOperator(buttons[index]) ? Colors.white : Colors.blueGrey,
-                      color: isOperator(buttons[index]) ? Colors.blueGrey : Colors.blueGrey[100]!,
+                      textColor: isOperator(buttons[index])
+                          ? Colors.white
+                          : blueGrey,
+                      color: isOperator(buttons[index])
+                          ? blueGrey
+                          : blueGrey[100]!,
                     );
                   },
                 ),
@@ -153,12 +176,26 @@ class _HomepageState extends State<Homepage> {
   }
 
   void calculateAnswer() {
+    String finalInput = userInput;
+    finalInput = finalInput.replaceAll('x', '*');
+    finalInput = finalInput.replaceAll('÷', '/');
+
+    if (isOperator(userInput[0]) ||
+        isOperator(userInput[userInput.length - 1])) {
+      answer = 'Error';
+      return;
+    }
+
     try {
       Parser p = Parser();
-      Expression exp = p.parse(userInput);
+      Expression exp = p.parse(finalInput);
       ContextModel cm = ContextModel();
       double eval = exp.evaluate(EvaluationType.REAL, cm);
-      answer = eval.toString();
+      if (eval.isNaN || eval.isInfinite) {
+        answer = 'Error';
+      } else {
+        answer = eval.toString();
+      }
     } catch (e) {
       answer = 'Error';
     }
