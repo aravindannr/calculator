@@ -1,9 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:math_expressions/math_expressions.dart';
-import '../constants.dart';
-import '../widgets/Mybuttons.dart';
-
+import '../utils/colorConstants/constants.dart';
+import '../widgets/funtions.dart';
+import '../widgets/myButton.dart';
 class Homepage extends StatefulWidget {
   @override
   State<Homepage> createState() => _HomepageState();
@@ -34,6 +33,11 @@ class _HomepageState extends State<Homepage> {
     'ANS',
     '='
   ];
+  void calculate() {
+    setState(() {
+      answer = calculateAnswer(userInput);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +63,7 @@ class _HomepageState extends State<Homepage> {
                       alignment: Alignment.centerRight,
                       child: Text(
                         answer,
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontSize: 40, fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -111,12 +115,12 @@ class _HomepageState extends State<Homepage> {
                       return MyButton(
                         onPressed: () {
                           setState(() {
-                            calculateAnswer();
+                            calculate();
                           });
                         },
                         buttonText: buttons[index],
-                        color: blueGrey,
-                        textColor: white,
+                        color: Colors.blueGrey,
+                        textColor: Colors.white,
                       );
                     } else if (index == 2) {
                       return MyButton(
@@ -139,7 +143,7 @@ class _HomepageState extends State<Homepage> {
                       onPressed: () {
                         setState(() {
                           if (buttons[index] == '=') {
-                            calculateAnswer();
+                            calculateAnswer(userInput);
                           } else if (buttons[index] == 'ANS') {
                             userInput += answer;
                           } else {
@@ -169,35 +173,5 @@ class _HomepageState extends State<Homepage> {
         ],
       ),
     );
-  }
-
-  bool isOperator(String x) {
-    return x == '%' || x == 'x' || x == '-' || x == '+' || x == '=' || x == '÷';
-  }
-
-  void calculateAnswer() {
-    String finalInput = userInput;
-    finalInput = finalInput.replaceAll('x', '*');
-    finalInput = finalInput.replaceAll('÷', '/');
-
-    if (isOperator(userInput[0]) ||
-        isOperator(userInput[userInput.length - 1])) {
-      answer = 'Error';
-      return;
-    }
-
-    try {
-      Parser p = Parser();
-      Expression exp = p.parse(finalInput);
-      ContextModel cm = ContextModel();
-      double eval = exp.evaluate(EvaluationType.REAL, cm);
-      if (eval.isNaN || eval.isInfinite) {
-        answer = 'Error';
-      } else {
-        answer = eval.toString();
-      }
-    } catch (e) {
-      answer = 'Error';
-    }
   }
 }
